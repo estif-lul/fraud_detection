@@ -25,14 +25,17 @@ def evaluate_model(model, X_test, y_test):
         X_test: Test features.
         y_test: True labels for test data.
     """
+    # Make predictions
     y_pred = model.predict(X_test)
     y_proba = model.predict_proba(X_test)[:,1]
 
     print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
     print("Classification Report:\n", classification_report(y_test, y_pred))
 
+    # Calculate precision-recall curve and AUC-PR
     precision, recall, _ = precision_recall_curve(y_test, y_proba)
     auc_pr = auc(recall, precision)
+    # Calculate F1 score
     f1 = f1_score(y_test, y_pred)
 
     print(f"F1 Score: {f1:.4f}")
@@ -94,14 +97,17 @@ log_credit.fit(Xc_train_resampled, yc_train_resampled)
 # Adjust scale_pos_weight based on the class imbalance
 # For fraud detection, we assume a lower imbalance, hence a lower scale_pos_weight
 xgb_fraud = XGBClassifier(scale_pos_weight=10, use_label_encoder=False, eval_metric='logloss')
+# Fit the fraud model
 xgb_fraud.fit(Xf_train_resampled, yf_train_resampled)
 
 xgb_credit = XGBClassifier(scale_pos_weight=50, use_label_encoder=False, eval_metric='logloss')
+# Fit the credit card fraud model
 xgb_credit.fit(Xc_train_resampled, yc_train_resampled)
 
-# Evaluate models on test data
+# Evaluate models on fraud test data
 evaluate_model(log_fraud, Xf_test, yf_test)
 evaluate_model(xgb_fraud, Xf_test, yf_test)
 
+# Evaluate models on credit card fraud test data
 evaluate_model(log_credit, Xc_test, yc_test)
 evaluate_model(xgb_credit, Xc_test, yc_test)
