@@ -44,21 +44,25 @@ def evaluate_model(model, X_test, y_test):
 Xf = fraud_df.drop(columns=['class'])
 yf = fraud_df['class']
 
-# One-hot encode before sampling
-Xf = pd.get_dummies(Xf)
+print("Started one-hot encoding for fraud detection data...")
 
+# One-hot encode before sampling
+Xf = pd.get_dummies(Xf, columns=['source','browser','sex','country'], drop_first=True)
+
+
+print("Started splitting fraud detection data...")
 Xf_train, Xf_test, yf_train, yf_test = train_test_split(Xf, yf, stratify=yf, test_size=0.3, random_state=42)
 
 print("Started SMOTE for fraud detection data...")
-smote = SMOTE(random_state=42)
+smote = SMOTE()
 Xf_train_resampled, yf_train_resampled = smote.fit_resample(Xf_train, yf_train)
 
 print("Started scaling for fraud detection data...")
 scaler = StandardScaler()
-# Only scale 'Amount'
-Xf_train_resampled['Amount'] = scaler.fit_transform(Xf_train_resampled[['Amount']])
+# Only scale 'purchase_value'
+Xf_train_resampled['purchase_value'] = scaler.fit_transform(Xf_train_resampled[['purchase_value']])
 print("Transforming test data...")
-Xf_test['Amount'] = scaler.transform(Xf_test[['Amount']])
+Xf_test['purchase_value'] = scaler.transform(Xf_test[['purchase_value']])
 
 
 # Prepare credit card fraud data
@@ -70,7 +74,7 @@ yc = credit_df['Class']
 Xc_train, Xc_test, yc_train, yc_test = train_test_split(Xc, yc, stratify=yc, test_size=0.3, random_state=42)
 
 # smote for credit card fraud data
-smote = SMOTE(random_state=42)
+smote = SMOTE()
 Xc_train_resampled, yc_train_resampled = smote.fit_resample(Xc_train, yc_train)
 
 scaler = StandardScaler()
